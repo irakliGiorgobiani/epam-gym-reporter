@@ -1,10 +1,11 @@
 package com.epam.epamgymreporter.service;
 
+import com.epam.epamgymreporter.converter.DtoToBoConverter;
 import com.epam.epamgymreporter.model.dto.TrainingDto;
 import com.epam.epamgymreporter.model.dto.TrainingSummaryDto;
 import com.epam.epamgymreporter.model.bo.Training;
 import com.epam.epamgymreporter.repository.TrainingRepository;
-import jakarta.ws.rs.NotFoundException;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,10 +20,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.eq;
 
@@ -32,12 +31,19 @@ class TrainingServiceTest {
     @Mock
     private TrainingRepository trainingRepository;
 
+    @Mock
+    private DtoToBoConverter converter;
+
     @InjectMocks
     private TrainingService trainingService;
 
-    @Test
-    void testSaveTrainingAdd() {
-        TrainingDto trainingDto = TrainingDto.builder()
+    TrainingDto trainingDto;
+
+    Training training;
+
+    @BeforeEach
+    public void setUp() {
+        trainingDto = TrainingDto.builder()
                 .username("username")
                 .firstName("firstName")
                 .lastName("lastName")
@@ -47,7 +53,7 @@ class TrainingServiceTest {
                 .actionType("ADD")
                 .build();
 
-        Training training = Training.builder()
+        training = Training.builder()
                 .username("username")
                 .firstName("firstName")
                 .lastName("lastName")
@@ -55,25 +61,22 @@ class TrainingServiceTest {
                 .trainingDate(LocalDate.now())
                 .trainingDuration(1.5)
                 .build();
+    }
 
-        when(trainingRepository.save(any(Training.class))).thenReturn(training);
+    @Test
+    void testSaveTrainingAdd() {
+        when(converter.trainingDtoToTraining(trainingDto)).thenReturn(training);
 
         trainingService.saveTraining(trainingDto);
 
-        verify(trainingRepository, times(1)).save(any(Training.class));
+        verify(trainingRepository, times(1)).save(training);
     }
 
     @Test
     void testSaveTrainingDelete() {
-        TrainingDto trainingDto = TrainingDto.builder()
-                .username("username")
-                .firstName("firstName")
-                .lastName("lastName")
-                .active(true)
-                .trainingDate(LocalDate.now())
-                .trainingDuration(1.5)
-                .actionType("DELETE")
-                .build();
+        trainingDto.setActionType("DELETE");
+
+        when(converter.trainingDtoToTraining(trainingDto)).thenReturn(training);
 
         trainingService.saveTraining(trainingDto);
 
@@ -86,14 +89,7 @@ class TrainingServiceTest {
     @Test
     void testGetMonthlyTrainingSummary() {
         List<Training> trainings = new ArrayList<>();
-        trainings.add(Training.builder()
-                .username("username")
-                .firstName("firstName")
-                .lastName("lastName")
-                .active(true)
-                .trainingDate(LocalDate.now())
-                .trainingDuration(1.5)
-                .build());
+        trainings.add(training);
 
         when(trainingRepository.getTrainingByUsername("username")).thenReturn(trainings);
 
@@ -112,11 +108,4 @@ class TrainingServiceTest {
 
         assertEquals(expectedYearlySummary, summaryDto.getYearlySummary());
     }
-//
-//    @Test
-//    void testGetMonthlyTrainingSummary() {
-//        when(trainingRepository.getTrainingByUsername("username")).thenReturn(new ArrayList<>());
-//
-//        assertThrows(NotFoundException.class, () -> trainingService.getMonthlyTrainingSummary("username"));
-//    }
 }
