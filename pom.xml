@@ -126,6 +126,7 @@
                         <exclude>com/epam/epamgymreporter/repository/*</exclude>
                         <exclude>com/epam/epamgymreporter/aspect/*</exclude>
                         <exclude>com/epam/epamgymreporter/converter/*</exclude>
+                        <exclude>com/epam/epamgymreporter/error/*</exclude>
                         <exclude>com/epam/epamgymreporter/epamgymdemo/**</exclude>
                         <exclude>com/epam/epamgymreporter/service/JwtService.class</exclude>
                     </excludes>
