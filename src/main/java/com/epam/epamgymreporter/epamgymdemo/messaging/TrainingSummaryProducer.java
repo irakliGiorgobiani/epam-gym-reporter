@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TrainingSummaryDtoProducer {
+public class TrainingSummaryProducer {
 
     private static final String TRAINING_SUMMARY_RESPONSE = "training.summary.response.queue";
 

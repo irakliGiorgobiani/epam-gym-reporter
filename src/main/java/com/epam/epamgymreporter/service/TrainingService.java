@@ -1,7 +1,7 @@
 package com.epam.epamgymreporter.service;
 
 import com.epam.epamgymreporter.converter.DtoToBoConverter;
-import com.epam.epamgymreporter.epamgymdemo.messaging.TrainingSummaryDtoProducer;
+import com.epam.epamgymreporter.epamgymdemo.messaging.TrainingSummaryProducer;
 import com.epam.epamgymreporter.model.dto.TrainingDto;
 import com.epam.epamgymreporter.model.dto.TrainingSummaryDto;
 import com.epam.epamgymreporter.model.bo.Training;
@@ -23,7 +23,7 @@ public class TrainingService {
 
     private final DtoToBoConverter converter;
 
-    private final TrainingSummaryDtoProducer trainingSummaryDtoProducer;
+    private final TrainingSummaryProducer trainingSummaryProducer;
 
     private static final String ADD = "ADD";
 
@@ -80,6 +80,6 @@ public class TrainingService {
     }
 
     public void sendTrainingSummary(String username) {
-        trainingSummaryDtoProducer.send(this.getMonthlyTrainingSummary(username));
+        trainingSummaryProducer.send(this.getMonthlyTrainingSummary(username));
     }
 }

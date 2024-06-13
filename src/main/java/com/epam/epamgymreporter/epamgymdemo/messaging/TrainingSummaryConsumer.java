@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
-public class TrainingSummaryDtoConsumer {
+public class TrainingSummaryConsumer {
 
     private final TrainingService trainingService;
 
