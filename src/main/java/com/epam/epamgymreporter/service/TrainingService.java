@@ -1,11 +1,11 @@
 package com.epam.epamgymreporter.service;
 
 import com.epam.epamgymreporter.converter.DtoToBoConverter;
+import com.epam.epamgymreporter.epamgymdemo.messaging.TrainingSummaryDtoProducer;
 import com.epam.epamgymreporter.model.dto.TrainingDto;
 import com.epam.epamgymreporter.model.dto.TrainingSummaryDto;
 import com.epam.epamgymreporter.model.bo.Training;
 import com.epam.epamgymreporter.repository.TrainingRepository;
-import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +22,8 @@ public class TrainingService {
     private final TrainingRepository trainingRepository;
 
     private final DtoToBoConverter converter;
+
+    private final TrainingSummaryDtoProducer trainingSummaryDtoProducer;
 
     private static final String ADD = "ADD";
 
@@ -56,17 +58,7 @@ public class TrainingService {
 
         List<Training> trainings = trainingRepository.getTrainingByUsername(username);
 
-        if (trainings.isEmpty()) {
-            throw new NotFoundException("trainer with that Username does not exist or has no training scheduled");
-        }
-
-        Training training = trainings.get(0);
-
-        String status;
-
-        if (training.getActive()) {
-            status = ACTIVE;
-        } else status = NOT_ACTIVE;
+        String status = trainings.isEmpty() ? NOT_ACTIVE : ACTIVE;
 
         Map<Integer, Map<Integer, Double>> yearlySummary = trainings.stream()
                 .collect(Collectors.groupingBy(
@@ -80,10 +72,14 @@ public class TrainingService {
 
         return TrainingSummaryDto.builder()
                 .username(username)
-                .firstName(training.getFirstName())
-                .lastName(training.getLastName())
+                .firstName(trainings.isEmpty() ? "" : trainings.get(0).getFirstName())
+                .lastName(trainings.isEmpty() ? "" : trainings.get(0).getLastName())
                 .status(status)
                 .yearlySummary(yearlySummary)
                 .build();
+    }
+
+    public void sendTrainingSummary(String username) {
+        trainingSummaryDtoProducer.send(this.getMonthlyTrainingSummary(username));
     }
 }
