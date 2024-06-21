@@ -1,13 +1,12 @@
 package com.epam.epamgymreporter.service;
 
-import com.epam.epamgymreporter.converter.BoToDtoConverter;
-import com.epam.epamgymreporter.converter.DtoToBoConverter;
+import com.epam.epamgymreporter.converter.SummaryToSummaryDtoConverter;
+import com.epam.epamgymreporter.converter.TrainingDtoToSummaryConverter;
 import com.epam.epamgymreporter.epamgymdemo.messaging.TrainingSummaryProducer;
 import com.epam.epamgymreporter.model.bo.TrainingSummary;
 import com.epam.epamgymreporter.model.dto.TrainingDto;
 import com.epam.epamgymreporter.model.dto.TrainingSummaryDto;
 import com.epam.epamgymreporter.repository.TrainingSummaryRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -22,7 +21,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,22 +34,21 @@ class TrainingSummaryServiceTest {
     private TrainingSummaryProducer trainingSummaryProducer;
 
     @Mock
-    private BoToDtoConverter boToDtoConverter;
+    private TrainingDtoToSummaryConverter trainingDtoToSummaryConverter;
 
     @Mock
-    private DtoToBoConverter dtoToBoConverter;
+    private SummaryToSummaryDtoConverter summaryToSummaryDtoConverter;
 
     @InjectMocks
     private TrainingSummaryService trainingSummaryService;
 
-    private TrainingSummary summary;
+    private static final TrainingSummary summary;
 
-    private String username;
+    private static final String username;
 
-    private TrainingDto trainingDto;
+    private static final TrainingDto trainingDto;
 
-    @BeforeEach
-    public void setUp() {
+    static {
         username = "username";
 
         HashMap<Integer, Map<Integer, Number>> yearlySummary = new HashMap<>();
@@ -80,7 +77,7 @@ class TrainingSummaryServiceTest {
 
         trainingSummaryService.saveTrainingSummary(trainingDto);
 
-        verify(trainingSummaryRepository, times(1)).save(summary);
+        verify(trainingSummaryRepository).save(summary);
         assertEquals(Objects.requireNonNull(trainingSummaryRepository.findByUsername(username).orElse(null))
                 .getUsername(), username);
     }
@@ -88,11 +85,11 @@ class TrainingSummaryServiceTest {
     @Test
     void testCreatingTrainingSummary() {
         when(trainingSummaryRepository.findByUsername(trainingDto.getUsername())).thenReturn(Optional.empty());
-        when(dtoToBoConverter.trainingDtoToSummary(trainingDto)).thenReturn(summary);
+        when(trainingDtoToSummaryConverter.convert(trainingDto)).thenReturn(summary);
 
         trainingSummaryService.saveTrainingSummary(trainingDto);
 
-        verify(trainingSummaryRepository, times(1)).save(summary);
+        verify(trainingSummaryRepository).save(summary);
     }
 
     @Test
@@ -101,10 +98,10 @@ class TrainingSummaryServiceTest {
         TrainingSummaryDto trainingSummaryDto = TrainingSummaryDto.builder().username(username).build();
 
         when(trainingSummaryRepository.findByUsername(username)).thenReturn(Optional.of(summary));
-        when(boToDtoConverter.summaryToSummaryDto(summary)).thenReturn(trainingSummaryDto);
+        when(summaryToSummaryDtoConverter.convert(summary)).thenReturn(trainingSummaryDto);
 
         trainingSummaryService.sendTrainingSummary(username);
 
-        verify(trainingSummaryProducer, times(1)).send(any());
+        verify(trainingSummaryProducer).send(any());
     }
 }

@@ -1,7 +1,7 @@
 package com.epam.epamgymreporter.service;
 
-import com.epam.epamgymreporter.converter.BoToDtoConverter;
-import com.epam.epamgymreporter.converter.DtoToBoConverter;
+import com.epam.epamgymreporter.converter.SummaryToSummaryDtoConverter;
+import com.epam.epamgymreporter.converter.TrainingDtoToSummaryConverter;
 import com.epam.epamgymreporter.epamgymdemo.messaging.TrainingSummaryProducer;
 import com.epam.epamgymreporter.exception.RepositoryInconsistencyException;
 import com.epam.epamgymreporter.exception.UsernameNotFoundException;
@@ -21,16 +21,16 @@ public class TrainingSummaryService {
 
     private final TrainingSummaryProducer trainingSummaryProducer;
 
-    private final DtoToBoConverter dtoToBoConverter;
+    private final TrainingDtoToSummaryConverter trainingDtoToSummaryConverter;
 
-    private final BoToDtoConverter boToDtoConverter;
+    private final SummaryToSummaryDtoConverter summaryToSummaryDtoConverter;
 
     public void saveTrainingSummary(TrainingDto trainingDto) {
         if (trainingSummaryRepository.findByUsername(trainingDto.getUsername()).isPresent()) {
             trainingSummaryRepository.save(updateTrainingSummary(findByUsername(trainingDto.getUsername()),
                     trainingDto));
         } else {
-            trainingSummaryRepository.save(dtoToBoConverter.trainingDtoToSummary(trainingDto));
+            trainingSummaryRepository.save(trainingDtoToSummaryConverter.convert(trainingDto));
         }
     }
 
@@ -52,7 +52,7 @@ public class TrainingSummaryService {
 
     public void sendTrainingSummary(String username) {
         if (trainingSummaryRepository.findByUsername(username).isPresent()) {
-            trainingSummaryProducer.send(boToDtoConverter.summaryToSummaryDto(findByUsername(username)));
+            trainingSummaryProducer.send(summaryToSummaryDtoConverter.convert(findByUsername(username)));
         } else throw new UsernameNotFoundException("Provided username does not exist.");
     }
 }

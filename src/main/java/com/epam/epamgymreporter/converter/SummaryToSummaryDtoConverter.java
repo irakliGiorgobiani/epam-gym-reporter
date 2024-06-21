@@ -5,9 +5,9 @@ import com.epam.epamgymreporter.model.dto.TrainingSummaryDto;
 import org.springframework.stereotype.Component;
 
 @Component
-public class BoToDtoConverter {
+public class SummaryToSummaryDtoConverter {
 
-    public TrainingSummaryDto summaryToSummaryDto(TrainingSummary trainingSummary) {
+    public TrainingSummaryDto convert(TrainingSummary trainingSummary) {
         return TrainingSummaryDto.builder()
                 .username(trainingSummary.getUsername())
                 .firstName(trainingSummary.getFirstName())

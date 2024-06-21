@@ -8,9 +8,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Component
-public class DtoToBoConverter {
+public class TrainingDtoToSummaryConverter {
 
-    public TrainingSummary trainingDtoToSummary(TrainingDto trainingDto) {
+    public TrainingSummary convert(TrainingDto trainingDto) {
         Map<Integer, Number> monthSummary = new HashMap<>();
         monthSummary.put(trainingDto.getTrainingDate().getMonthValue(), trainingDto.getTrainingDuration());
 
