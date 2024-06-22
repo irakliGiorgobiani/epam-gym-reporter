@@ -1,4 +1,6 @@
+@Summary
 Feature: Training Summary Management
+
   Scenario: Creating a new training summary
     Given a new TrainingDto instance with the username "john_doe"
     When saving to the database
